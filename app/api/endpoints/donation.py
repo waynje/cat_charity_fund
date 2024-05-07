@@ -8,6 +8,7 @@ from app.core.user import current_superuser, current_user
 from app.crud.donation import donation_crud
 from app.models import User
 from app.schemas.donation import DonationCreate, DonationDB
+from app.services.investment import make_investment
 
 
 router = APIRouter()
@@ -48,6 +49,7 @@ async def make_donation(
     new_donation = donation_crud.create(
         donation, session, user
     )
-    # await создание инвестирования в проект
+    await make_investment(session,
+                          new_donation)
     await session.refresh(new_donation)
     return new_donation

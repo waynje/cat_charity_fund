@@ -12,6 +12,7 @@ from app.crud.charity_project import charityproject_crud
 from app.schemas.charity_project import (CharityProjectCreate,
                                          CharityProjectDB,
                                          CharityProjectUpdate)
+from app.services.investment import make_investment
 
 router = APIRouter()
 
@@ -40,7 +41,7 @@ async def create_charity_project(
                                        session)
     new_project = await charityproject_crud.create(charity_project,
                                                    session)
-    # создание сбора через функцию
+    await make_investment(session, new_project)
     await session.refresh(new_project)
     return new_project
 
