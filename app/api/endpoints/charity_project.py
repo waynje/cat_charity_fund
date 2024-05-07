@@ -86,6 +86,6 @@ async def delete_project(
                                                  session)
     await check_project_was_invested(project_id,
                                      session)
-    current_project = charityproject_crud.remove(project_id,
+    current_project = charityproject_crud.remove(current_project,
                                                  session)
     return current_project
