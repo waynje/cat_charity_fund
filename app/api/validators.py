@@ -74,7 +74,7 @@ async def check_project_was_invested(
 
 
 async def check_correct_amount_to_update(
-    project_id: int, 
+    project_id: int,
     session: AsyncSession,
     full_amount_to_update: PositiveInt
 ):

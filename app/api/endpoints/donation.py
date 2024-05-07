@@ -26,7 +26,7 @@ async def get_all_donations(
 
 @router.get('/my',
             response_model=List[DonationDB],
-            response_model_exclude=['user_id','invested_amount','fully_invested','close_date'])
+            response_model_exclude=['user_id', 'invested_amount', 'fully_invested', 'close_date'])
 async def get_all_user_donations(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_user)
@@ -38,7 +38,7 @@ async def get_all_user_donations(
 
 @router.post('/',
              response_model=DonationDB,
-             response_model_exclude=['user_id','invested_amount','fully_invested','close_date'],
+             response_model_exclude=['user_id', 'invested_amount', 'fully_invested', 'close_date'],
              response_model_exclude_none=True)
 async def make_donation(
     donation: DonationCreate,
