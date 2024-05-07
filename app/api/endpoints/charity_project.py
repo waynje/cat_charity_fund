@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from http import HTTPStatus
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.validators import (
@@ -12,7 +13,8 @@ from app.crud.charity_project import charityproject_crud
 from app.schemas.charity_project import (CharityProjectCreate,
                                          CharityProjectDB,
                                          CharityProjectUpdate)
-from app.services.investment import make_investment
+from app.services.investment import make_investment, get_not_closed_projects
+from app.models import Donation
 
 router = APIRouter()
 
@@ -41,7 +43,8 @@ async def create_charity_project(
                                        session)
     new_project = await charityproject_crud.create(charity_project,
                                                    session)
-    await make_investment(session, new_project)
+    not_invested_donations = await get_not_closed_projects(session, Donation)
+    await make_investment(session, new_project, not_invested_donations)
     await session.refresh(new_project)
     return new_project
 
@@ -57,8 +60,11 @@ async def partially_update_project(
 
     current_project = await check_project_exists(project_id,
                                                  session)
-    await check_project_closed(project_id,
-                               session)
+    if current_project.fully_invested == True:
+        return HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail='Проект закрыт.'
+        )
 
     if obj_in.full_amount is not None:
         await check_correct_amount_to_update(project_id,
@@ -76,7 +82,8 @@ async def partially_update_project(
 
 
 @router.delete('/{project_id}',
-               dependencies=[Depends(current_superuser)])
+               dependencies=[Depends(current_superuser)],
+               response_model=CharityProjectDB)
 async def delete_project(
     project_id: int,
     session: AsyncSession = Depends(get_async_session)
@@ -86,6 +93,6 @@ async def delete_project(
                                                  session)
     await check_project_was_invested(project_id,
                                      session)
-    current_project = charityproject_crud.remove(current_project,
-                                                 session)
+    current_project = await charityproject_crud.remove(current_project,
+                                                       session)
     return current_project

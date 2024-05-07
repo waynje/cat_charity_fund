@@ -3,55 +3,53 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.db import DonationCharityBase
 from app.models import CharityProject, Donation
 
 
 async def get_not_closed_projects(
     session: AsyncSession,
-):
+    model_in: DonationCharityBase
+) -> list[DonationCharityBase]:
 
-    projects_to_invest = await session.execute(select(CharityProject).where(
-        CharityProject.fully_invested == 0
+    not_closed_obj = await session.execute(select(model_in).where(
+        model_in.fully_invested == 0
     ).order_by('create_date'))
-    project = projects_to_invest.scalars().first()
-
-    donations = await session.execute(select(Donation).where(
-        Donation.fully_invested == 0
-    ).order_by('create_date'))
-    donation = donations.scalars().first()
-
-    return project, donation
+    return not_closed_obj.scalars().all()
 
 
 async def make_investment(
     session: AsyncSession,
-    obj
+    obj: DonationCharityBase,
+    list_obj: list[DonationCharityBase]
 ):
 
-    project, donation = await get_not_closed_projects(session=session)
-    project_balance = project.full_amount - project.invested_amount
-    donation_balance = donation.full_amount - donation.invested_amount
+    need_to_invest = obj.full_amount
 
-    if project_balance > donation_balance:
-        project.invested_amount += donation_balance
-        donation.invested_amount += donation_balance
-        donation.fully_invested = True
-        donation.close_date = datetime.now()
-    elif project_balance == donation_balance:
-        project.invested_amount += donation_balance
-        donation.invested_amount += donation_balance
-        project.fully_invested = True
-        donation.fully_invested = True
-        project.close_date = datetime.now()
-        donation.close_date = datetime.now()
-    else:
-        project.invested_amount += project_balance
-        donation.invested_amount += project_balance
-        project.fully_invested = True
-        project.close_date = datetime.now()
-    session.add(project)
-    session.add(donation)
-    await session.commit()
-    await session.refresh(project)
-    await session.refresh(donation)
-    return await make_investment(session, obj)
+    if list_obj:
+        for item in list_obj:
+
+            if need_to_invest == item.full_amount - item.invested_amount:
+                obj.invested_amount = obj.full_amount
+                item.full_amount = item.full_amount
+                obj.close_date = datetime.now()
+                obj.fully_invested = True
+                item.close_date = datetime.now()
+                item.fully_invested = True
+                break
+
+            elif need_to_invest > item.full_amount - item.invested_amount:
+                need_to_invest -= item.full_amount - item.invested_amount
+                item.invested_amount = item.full_amount
+                item.close = datetime.now()
+                item.fully_invested = True
+
+            else:
+                item.invested_amount += need_to_invest
+                obj.invested_amount = obj.full_amount
+                obj.close_date = datetime.now()
+                obj.fully_invested = True
+                break
+    session.commit()
+    session.refresh(obj)
+    return obj
