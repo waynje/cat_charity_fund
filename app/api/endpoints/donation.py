@@ -46,9 +46,9 @@ async def make_donation(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_user)
 ):
-    new_donation = donation_crud.create(
-        donation, session, user
-    )
+    new_donation = donation_crud.create(donation,
+                                        session,
+                                        user)
     await make_investment(session,
                           new_donation)
     await session.refresh(new_donation)
