@@ -38,6 +38,8 @@ async def check_project_exists(
             detail='Такого проекта не существует.'
         )
 
+    return project
+
 
 async def check_project_closed(
     project_id: int,

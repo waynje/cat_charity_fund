@@ -7,7 +7,7 @@ from app.models import CharityProject, Donation
 
 
 async def get_not_closed_projects(
-    session: AsyncSession
+    session: AsyncSession,
 ):
 
     projects_to_invest = await session.execute(select(CharityProject).where(
