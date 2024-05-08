@@ -31,7 +31,7 @@ async def make_investment(
 
             if need_to_invest == item.full_amount - item.invested_amount:
                 obj.invested_amount = obj.full_amount
-                item.full_amount = item.full_amount
+                item.invested_amount = item.full_amount
                 obj.close_date = datetime.now()
                 obj.fully_invested = True
                 item.close_date = datetime.now()
@@ -41,7 +41,7 @@ async def make_investment(
             elif need_to_invest > item.full_amount - item.invested_amount:
                 need_to_invest -= item.full_amount - item.invested_amount
                 item.invested_amount = item.full_amount
-                item.close = datetime.now()
+                item.close_date = datetime.now()
                 item.fully_invested = True
 
             else:
@@ -50,6 +50,6 @@ async def make_investment(
                 obj.close_date = datetime.now()
                 obj.fully_invested = True
                 break
-    session.commit()
-    session.refresh(obj)
+    await session.commit()
+    await session.refresh(obj)
     return obj

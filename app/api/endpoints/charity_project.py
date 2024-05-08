@@ -1,5 +1,4 @@
-from http import HTTPStatus
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.validators import (
@@ -63,7 +62,7 @@ async def partially_update_project(
 
     await check_project_was_invested_before_patch(current_project,
                                                   session)
-    
+
     if obj_in.full_amount is not None:
         await check_correct_amount_to_update(project_id,
                                              session,
