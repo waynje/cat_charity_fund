@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import false
 
 from app.core.db import DonationCharityBase
-from app.models import CharityProject, Donation
 
 
 async def get_not_closed_projects(

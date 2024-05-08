@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.validators import (
     check_project_name_duplicate, check_project_exists,
-    check_correct_amount_to_update,
+    check_correct_amount_to_update, check_project_was_invested_before_patch,
     check_project_was_invested
 )
 from app.core.db import get_async_session
@@ -60,12 +60,10 @@ async def partially_update_project(
 
     current_project = await check_project_exists(project_id,
                                                  session)
-    if current_project.fully_invested == True:
-        return HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail='Проект закрыт.'
-        )
 
+    await check_project_was_invested_before_patch(current_project,
+                                                  session)
+    
     if obj_in.full_amount is not None:
         await check_correct_amount_to_update(project_id,
                                              session,

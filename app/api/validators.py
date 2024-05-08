@@ -87,3 +87,15 @@ async def check_correct_amount_to_update(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
             detail='Сумма донатов больше запрашиваемой. Изменить невозможно.'
         )
+
+
+async def check_project_was_invested_before_patch(
+        charity_project: CharityProject,
+        session: AsyncSession
+) -> None:
+    if charity_project.fully_invested:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail=('Нельзя редактировать закрытый проект или проект,'
+                    'в который уже были полностью инвестированы средства')
+        )
