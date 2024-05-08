@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.validators import (
     check_project_name_duplicate, check_project_exists,
-    check_project_closed, check_correct_amount_to_update,
+    check_correct_amount_to_update,
     check_project_was_invested
 )
 from app.core.db import get_async_session
@@ -91,7 +91,7 @@ async def delete_project(
 
     current_project = await check_project_exists(project_id,
                                                  session)
-    await check_project_was_invested(project_id,
+    await check_project_was_invested(current_project,
                                      session)
     current_project = await charityproject_crud.remove(current_project,
                                                        session)

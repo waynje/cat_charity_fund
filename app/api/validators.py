@@ -59,19 +59,14 @@ async def check_project_closed(
 
 
 async def check_project_was_invested(
-    project_id: int,
-    session: AsyncSession
-):
-
-    project_invested_amount = await (
-        charityproject_crud.get_charity_project_invested_amount(
-            project_id, session
-        )
-    )
-    if project_invested_amount:
-        return HTTPException(
+        charity_project: CharityProject,
+        session: AsyncSession
+) -> None:
+    if charity_project.invested_amount > 0 or charity_project.fully_invested:
+        raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail='В данный проект уже инвестировали. Удаление невозможно.'
+            detail=('Нельзя удалять закрытый проект или проект,'
+                    'в который уже были инвестированы средства')
         )
 
 
