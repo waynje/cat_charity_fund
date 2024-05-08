@@ -1,4 +1,3 @@
-from datetime import datetime
 from http import HTTPStatus
 
 from fastapi import HTTPException
@@ -31,8 +30,9 @@ async def check_project_exists(
     session: AsyncSession
 ) -> CharityProject:
 
-    project = await (charityproject_crud.get_charity_project(object_id=project_id,
-                                                             session=session))
+    project = await (charityproject_crud.get_charity_project(
+        object_id=project_id,
+        session=session))
     if not project:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
