@@ -8,8 +8,11 @@ MAX_FIELD_LENGTH = 100
 
 
 class CharityProjectBase(BaseModel):
-    name: Optional[str] = Field(None, min_length=MIN_FIELD_LENGTH, max_length=MAX_FIELD_LENGTH)
-    description: Optional[str] = Field(None, min_length=MIN_FIELD_LENGTH)
+    name: Optional[str] = Field(None,
+                                min_length=MIN_FIELD_LENGTH,
+                                max_length=MAX_FIELD_LENGTH)
+    description: Optional[str] = Field(None,
+                                       min_length=MIN_FIELD_LENGTH)
     full_amount: Optional[PositiveInt]
 
     class Config:
@@ -17,8 +20,11 @@ class CharityProjectBase(BaseModel):
 
 
 class CharityProjectCreate(CharityProjectBase):
-    name: str = Field(..., min_length=1, max_length=100)
-    description: str = Field(..., min_length=1)
+    name: str = Field(...,
+                      min_length=MIN_FIELD_LENGTH,
+                      max_length=MAX_FIELD_LENGTH)
+    description: str = Field(...,
+                             min_length=MIN_FIELD_LENGTH)
     full_amount: PositiveInt
 
 
