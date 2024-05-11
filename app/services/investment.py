@@ -18,38 +18,33 @@ async def get_not_closed_projects(
     return not_closed_obj.scalars().all()
 
 
-async def make_investment(
-    session: AsyncSession,
+def make_investment(
     obj: DonationCharityBase,
     list_obj: list[DonationCharityBase]
-):
+) -> None:
 
     need_to_invest = obj.full_amount
 
-    if list_obj:
-        for item in list_obj:
-
-            if need_to_invest == item.full_amount - item.invested_amount:
-                obj.invested_amount = obj.full_amount
-                item.invested_amount = item.full_amount
-                obj.close_date = datetime.now()
-                obj.fully_invested = True
-                item.close_date = datetime.now()
-                item.fully_invested = True
-                break
-
-            elif need_to_invest > item.full_amount - item.invested_amount:
-                need_to_invest -= item.full_amount - item.invested_amount
-                item.invested_amount = item.full_amount
-                item.close_date = datetime.now()
-                item.fully_invested = True
-
-            else:
-                item.invested_amount += need_to_invest
-                obj.invested_amount = obj.full_amount
-                obj.close_date = datetime.now()
-                obj.fully_invested = True
-                break
-    await session.commit()
-    await session.refresh(obj)
+    if not list_obj:
+        return None
+    for item in list_obj:
+        if need_to_invest == item.full_amount - item.invested_amount:
+            obj.invested_amount = obj.full_amount
+            item.invested_amount = item.full_amount
+            obj.close_date = datetime.now()
+            obj.fully_invested = True
+            item.close_date = datetime.now()
+            item.fully_invested = True
+            break
+        elif need_to_invest > item.full_amount - item.invested_amount:
+            need_to_invest -= item.full_amount - item.invested_amount
+            item.invested_amount = item.full_amount
+            item.close_date = datetime.now()
+            item.fully_invested = True
+        else:
+            item.invested_amount += need_to_invest
+            obj.invested_amount = obj.full_amount
+            obj.close_date = datetime.now()
+            obj.fully_invested = True
+            break
     return obj

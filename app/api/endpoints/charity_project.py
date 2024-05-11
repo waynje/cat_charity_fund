@@ -25,8 +25,7 @@ async def get_all_charity_projects(
     session: AsyncSession = Depends(get_async_session)
 ):
 
-    projects = await charityproject_crud.get_multiple(session)
-    return projects
+    return await charityproject_crud.get_multiple(session)
 
 
 @router.post('/',
@@ -43,7 +42,8 @@ async def create_charity_project(
     new_project = await charityproject_crud.create(charity_project,
                                                    session)
     not_invested_donations = await get_not_closed_projects(session, Donation)
-    await make_investment(session, new_project, not_invested_donations)
+    make_investment(new_project, not_invested_donations)
+    await session.commit()
     await session.refresh(new_project)
     return new_project
 
@@ -59,23 +59,18 @@ async def partially_update_project(
 
     current_project = await check_project_exists(project_id,
                                                  session)
-
     await check_project_was_invested_before_patch(current_project,
                                                   session)
-
     if obj_in.full_amount is not None:
         await check_correct_amount_to_update(project_id,
                                              session,
                                              obj_in.full_amount)
-
     if obj_in.name is not None:
         await check_project_name_duplicate(obj_in.name,
                                            session)
-
-    current_project = await charityproject_crud.update(current_project,
-                                                       obj_in,
-                                                       session)
-    return current_project
+    return await charityproject_crud.update(current_project,
+                                            obj_in,
+                                            session)
 
 
 @router.delete('/{project_id}',
@@ -90,6 +85,5 @@ async def delete_project(
                                                  session)
     await check_project_was_invested(current_project,
                                      session)
-    current_project = await charityproject_crud.remove(current_project,
-                                                       session)
-    return current_project
+    return await charityproject_crud.remove(current_project,
+                                            session)
